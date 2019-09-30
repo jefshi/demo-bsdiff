@@ -63,7 +63,7 @@ int bspatch(int argc,char * argv[])
 	ssize_t oldsize,newsize;
 	ssize_t bzctrllen,bzdatalen;
 	u_char header[32],buf[8];
-	u_char *old, *new;
+	u_char *old, *aNew;
 	off_t oldpos,newpos;
 	off_t ctrl[3];
 	off_t lenread;
@@ -134,11 +134,11 @@ int bspatch(int argc,char * argv[])
 
 	if(((fd=open(argv[1],O_RDONLY,0))<0) ||
 		((oldsize=lseek(fd,0,SEEK_END))==-1) ||
-		((old=malloc(oldsize+1))==NULL) ||
+		((old=(unsigned char *)malloc(oldsize+1))==NULL) ||
 		(lseek(fd,0,SEEK_SET)!=0) ||
 		(read(fd,old,oldsize)!=oldsize) ||
 		(close(fd)==-1)) err(1,"%s",argv[1]);
-	if((new=malloc(newsize+1))==NULL) err(1,NULL);
+	if((aNew=(unsigned char *)malloc(newsize+1))==NULL) err(1,NULL);
 
 	oldpos=0;newpos=0;
 	while(newpos<newsize) {
@@ -156,7 +156,7 @@ int bspatch(int argc,char * argv[])
 			errx(1,"Corrupt patch\n");
 
 		/* Read diff string */
-		lenread = BZ2_bzRead(&dbz2err, dpfbz2, new + newpos, ctrl[0]);
+		lenread = BZ2_bzRead(&dbz2err, dpfbz2, aNew + newpos, ctrl[0]);
 		if ((lenread < ctrl[0]) ||
 		    ((dbz2err != BZ_OK) && (dbz2err != BZ_STREAM_END)))
 			errx(1, "Corrupt patch\n");
@@ -164,7 +164,7 @@ int bspatch(int argc,char * argv[])
 		/* Add old data to diff string */
 		for(i=0;i<ctrl[0];i++)
 			if((oldpos+i>=0) && (oldpos+i<oldsize))
-				new[newpos+i]+=old[oldpos+i];
+				aNew[newpos+i]+=old[oldpos+i];
 
 		/* Adjust pointers */
 		newpos+=ctrl[0];
@@ -175,7 +175,7 @@ int bspatch(int argc,char * argv[])
 			errx(1,"Corrupt patch\n");
 
 		/* Read extra string */
-		lenread = BZ2_bzRead(&ebz2err, epfbz2, new + newpos, ctrl[1]);
+		lenread = BZ2_bzRead(&ebz2err, epfbz2, aNew + newpos, ctrl[1]);
 		if ((lenread < ctrl[1]) ||
 		    ((ebz2err != BZ_OK) && (ebz2err != BZ_STREAM_END)))
 			errx(1, "Corrupt patch\n");
@@ -194,10 +194,10 @@ int bspatch(int argc,char * argv[])
 
 	/* Write the new file */
 	if(((fd=open(argv[2],O_CREAT|O_TRUNC|O_WRONLY,0666))<0) ||
-		(write(fd,new,newsize)!=newsize) || (close(fd)==-1))
+		(write(fd,aNew,newsize)!=newsize) || (close(fd)==-1))
 		err(1,"%s",argv[2]);
 
-	free(new);
+	free(aNew);
 	free(old);
 
 	return 0;
