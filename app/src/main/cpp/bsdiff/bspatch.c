@@ -3,7 +3,7 @@
  * All rights reserved
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted providing that the following conditions 
+ * modification, are permitted providing that the following conditions
  * are met:
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
@@ -54,7 +54,7 @@ static off_t offtin(u_char *buf)
 	return y;
 }
 
-int main(int argc,char * argv[])
+int bspatch(int argc,char * argv[])
 {
 	FILE * f, * cpf, * dpf, * epf;
 	BZFILE * cpfbz2, * dpfbz2, * epfbz2;

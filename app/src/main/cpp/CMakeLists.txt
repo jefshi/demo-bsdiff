@@ -10,6 +10,9 @@ cmake_minimum_required(VERSION 3.4.1)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
+aux_source_directory(bsdiff BSDIFF_SOURCE_FILES)
+aux_source_directory(bzip2 BZIP2_SOURCE_FILES)
+
 add_library( # Sets the name of the library.
         native-lib
 
@@ -26,11 +29,13 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        bsdiff/bsdiff-lib.cpp)
+        ${BZIP2_SOURCE_FILES}
+        ${BSDIFF_SOURCE_FILES})
 
 # 指定头文件库路径
 include_directories(
-        include)
+        include
+        bzip2)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
